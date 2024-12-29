@@ -1,0 +1,72 @@
+schemaVersion: 2.2.0
+metadata:
+  name: nodejs
+  version: 1.0.0
+components:
+  - name: runtime
+    container:
+      image: registry.access.redhat.com/ubi8/nodejs-12:1-45
+      memoryLimit: 1024Mi
+      mountSources: true
+      sourceMapping: /project
+      endpoints:
+        - name: http-3000
+          targetPort: 3000
+  - name: builder
+    image:
+      dockerfile:
+        buildContext: src
+        rootRequired: false
+        uri: src/Dockerfile
+      imageName: quay.io/dmitriy_kim/nodejs-example:latest
+  - name: deploy-component
+    kubernetes:
+      uri: kubernetes/deploy.yaml
+commands:
+  - id: build-image
+    apply:
+      component: builder
+    
+  - id: install
+    exec:
+      component: runtime
+      commandLine: npm install
+      workingDir: /project/src
+      group:
+        kind: build
+        isDefault: true
+  - id: run
+    exec:
+      component: runtime
+      commandLine: npm start
+      workingDir: /project/src
+      group:
+        kind: run
+        isDefault: true
+  - id: debug
+    exec:
+      component: runtime
+      commandLine: npm run debug
+      workingDir: /project/src
+      group:
+        kind: debug
+        isDefault: true
+  - id: test
+    exec:
+      component: runtime
+      commandLine: npm test
+      workingDir: /project/src
+      group:
+        kind: test
+        isDefault: true
+  - id: deploy-command
+    apply:
+      component: deploy-component
+  - id: deploy
+    composite:
+      commands:
+      - build-image
+      - deploy-command
+      group:
+        kind: deploy
+        isDefault: true
