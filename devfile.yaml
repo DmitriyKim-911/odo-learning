@@ -17,7 +17,7 @@ components:
       dockerfile:
         buildContext: src
         rootRequired: false
-        uri: src/Dockerfile
+        uri: Dockerfile
       imageName: quay.io/dmitriy_kim/nodejs-example:latest
   - name: deploy-component
     kubernetes:
