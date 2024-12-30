@@ -1,7 +1,7 @@
 FROM node:current-slim
 
 WORKDIR /usr/src/app
-COPY . .
+COPY ./src .
 RUN npm install
 
 EXPOSE 3001
